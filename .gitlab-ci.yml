@@ -1,0 +1,37 @@
+---
+image: docker:latest
+services:
+  - docker:18.09.7-dind
+
+stages:
+# - test
+  - build
+
+
+# run-tests:
+#   image: node:latest
+#   stage: test
+#   only:
+#     variables:
+#       - $CI_PROJECT_NAMESPACE == "uppl/microservices"
+#       - $TESTS_ENABLED == "true"
+#   script:
+#     - npm install
+#     - npm run test:cov
+#   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+#   tags:
+#     - docker
+
+
+docker-build:
+  stage: build
+  cache: {}
+  only:
+    - master
+    - develop
+  script:
+    - docker login -u $HUB_REGISTRY_USER -p $HUB_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t "$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA"
+  tags:
+    - dedicated
